@@ -1,0 +1,108 @@
+# https://wiki.archlinux.org/index.php/OpenSSL#Configuring
+
+
+# global
+
+DIR=		.			# Useful macro for populating real vars.
+RANDFILE=	${DIR}/private/.rnd	# Entropy source.
+default_md=	sha1			# Default message digest.
+
+# ca section
+[ ca ]
+default_ca=	dft_ca	# Configuration files may have more than one CA
+			# section for different scenarios.
+
+[ dft_ca ]
+certificate=	${DIR}/cacert.pem	# The CA certificate.
+database=	${DIR}/index.txt	# Keeps tracks of valid/revoked certs.
+new_certs_dir=	${DIR}/newcerts		# Copies of signed certificates, for
+					# administrative purposes.
+private_key=	${DIR}/private/cakey.pem # The CA key.
+serial=		${DIR}/serial		# Should be populated with the next
+					# cert hex serial.
+
+# These govern the way certificates are displayed while confirming
+# the signing process.
+name_opt=	ca_default
+cert_opt=	ca_default
+
+default_days=	365	# How long to sign certificates for.
+default_crl_days=30	# The same, but for CRL.
+
+policy=		dft_policy	# The default policy should be lenient.
+x509_extensions=cert_v3		# For v3 certificates.
+
+[ dft_policy ]
+# A value of 'supplied' means the field must be present in the certificate,
+# whereas 'match' means the field must be populated with the same contents as
+# the CA certificate. 'optional' dictates that the field is entirely optional.
+
+C=	supplied	# Country
+ST=	supplied	# State or province
+L=	optional	# Locality
+O=	supplied	# Organization
+OU=	optional	# Organizational unit
+CN=	supplied	# Common name
+
+[ cert_v3 ]
+# With the exception of 'CA:FALSE', there are PKIX recommendations for end-user
+# certificates that should not be able to sign other certificates.
+# 'CA:FALSE' is explicitely set because some software will malfunction without.
+
+subjectKeyIdentifier=	hash
+basicConstraints=	CA:FALSE
+keyUsage=		nonRepudiation, digitalSignature, keyEncipherment
+
+nsCertType=		client, email
+nsComment=		"OpenSSL Generated Certificate"
+
+authorityKeyIdentifier=keyid:always,issuer:always
+
+
+# req section
+[ req ]
+# Default bit encryption and out file for generated keys.
+default_bits=	1024
+default_keyfile=private/cakey.pem
+
+string_mask=	utf8only	# Only allow utf8 strings in request/ca fields.
+prompt=		no		# Do not prompt for field value confirmation.
+
+# CA req settings
+
+distinguished_name=ca_dn	# Distinguished name contents.
+x509_extensions=ca_v3		# For generating ca certificates.
+
+[ ca_dn ]
+# CN isn't needed for CA certificates
+C=	US
+ST=	New Jersey
+O=	localdomain
+
+[ ca_v3 ]
+subjectKeyIdentifier=	hash
+
+# PKIX says this should also contain the 'crucial' value, yet some programs
+# have trouble handling it.
+basicConstraints=	CA:TRUE
+
+keyUsage=	cRLSign, keyCertSign
+
+nsCertType=	sslCA
+nsComment=	"OpenSSL Generated CA Certificate"
+
+authorityKeyIdentifier=keyid:always,issuer:always
+
+# End-user req settings
+#distinguished_name=ca_dn	# Distinguished name contents.
+#req_extensions=req_v3		# For generating ca certificates.
+#
+#[ ca_dn ]
+#C=	US
+#ST=	New Jersey
+#O=	localdomain
+#CN=	localhost
+#
+#[ v3_req ]
+#basicConstraints=	CA:FALSE
+#keyUsage=		nonRepudiation, digitalSignature, keyEncipherment

@@ -1,0 +1,79 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 1048577 (0x100001)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: C=US, ST=New Jersey, O=localdomain
+        Validity
+            Not Before: Nov  2 13:20:13 2011 GMT
+            Not After : Nov  1 13:20:13 2012 GMT
+        Subject: C=AU, ST=Some-State, O=Internet Widgits Pty Ltd, CN=server
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+                    00:e5:d8:51:76:5e:f0:bb:1b:81:01:83:ce:4b:d9:
+                    f3:99:5f:7f:94:f6:49:e1:29:48:ba:3a:48:7a:d1:
+                    02:92:43:cd:ef:74:14:6f:79:cb:ef:13:eb:1d:a2:
+                    14:b9:6b:1a:31:65:0a:3a:e5:9c:99:10:a6:0a:45:
+                    53:53:4f:aa:1f:b7:07:ee:7f:20:12:d2:a3:04:ef:
+                    a6:aa:15:ac:08:5b:dc:84:aa:9b:91:54:d1:b1:44:
+                    86:7e:af:ba:42:47:f8:ee:51:54:96:d2:92:a1:8e:
+                    d9:d6:29:ba:a9:c4:39:22:9d:57:ee:d7:b2:1a:3c:
+                    6f:69:76:8e:42:ee:97:97:5b:79:a2:18:75:67:15:
+                    57:c4:63:14:49:8e:7a:7d:b7:65:c3:94:68:c7:30:
+                    90:32:56:e6:2a:4f:43:57:74:71:79:58:3d:9d:33:
+                    0a:be:9b:da:cc:ac:4e:f1:87:db:17:d6:91:a1:4e:
+                    46:65:d5:48:00:ca:87:58:45:93:d9:01:82:b6:db:
+                    4e:0d:d1:24:ff:9a:2a:a7:2d:50:6a:92:1a:71:e3:
+                    a3:f9:a5:e6:5a:20:42:31:ff:7e:a7:4c:95:1c:d3:
+                    db:8d:28:fb:ae:d4:79:2c:01:71:e7:a5:24:2d:60:
+                    31:d4:9a:93:f2:92:86:cf:7b:ee:67:ba:5f:6d:ab:
+                    94:c9
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Subject Key Identifier: 
+                C7:E3:88:A1:EB:49:05:3F:D3:FF:4D:F4:54:66:F7:D1:70:8C:43:72
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            X509v3 Key Usage: 
+                Digital Signature, Non Repudiation, Key Encipherment
+            Netscape Cert Type: 
+                SSL Client, S/MIME
+            Netscape Comment: 
+                OpenSSL Generated Certificate
+            X509v3 Authority Key Identifier: 
+                keyid:18:5F:82:44:DC:54:98:81:D9:D6:B2:F3:E7:B3:54:C7:95:B0:21:3A
+                DirName:/C=US/ST=New Jersey/O=localdomain
+                serial:92:E7:C7:6D:96:71:CF:6A
+
+    Signature Algorithm: sha1WithRSAEncryption
+        55:24:55:40:e1:04:07:93:9d:67:ac:36:c3:5c:c4:21:44:23:
+        01:36:fb:47:27:54:2c:48:ec:5b:58:bc:b3:d8:12:ae:e4:3b:
+        fc:42:3c:f6:f2:04:1c:56:17:b2:3c:a9:81:0b:ae:d4:e3:17:
+        3c:dd:e0:bb:ff:09:01:21:bc:a8:28:4f:e6:41:37:53:3e:15:
+        81:7c:d3:bb:5b:00:c2:49:89:04:70:52:b4:2e:ce:4f:4f:1f:
+        32:d6:1f:27:84:34:e9:1f:be:e8:ba:b7:a4:fa:43:44:1e:bc:
+        c2:c4:a1:3b:1f:df:20:a4:68:c7:a2:5f:e0:07:9a:86:c7:5f:
+        11:9c
+-----BEGIN CERTIFICATE-----
+MIIDcDCCAtmgAwIBAgIDEAABMA0GCSqGSIb3DQEBBQUAMDgxCzAJBgNVBAYTAlVT
+MRMwEQYDVQQIDApOZXcgSmVyc2V5MRQwEgYDVQQKDAtsb2NhbGRvbWFpbjAeFw0x
+MTExMDIxMzIwMTNaFw0xMjExMDExMzIwMTNaMFYxCzAJBgNVBAYTAkFVMRMwEQYD
+VQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBXaWRnaXRzIFB0eSBM
+dGQxDzANBgNVBAMMBnNlcnZlcjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC
+ggEBAOXYUXZe8LsbgQGDzkvZ85lff5T2SeEpSLo6SHrRApJDze90FG95y+8T6x2i
+FLlrGjFlCjrlnJkQpgpFU1NPqh+3B+5/IBLSowTvpqoVrAhb3ISqm5FU0bFEhn6v
+ukJH+O5RVJbSkqGO2dYpuqnEOSKdV+7Xsho8b2l2jkLul5dbeaIYdWcVV8RjFEmO
+en23ZcOUaMcwkDJW5ipPQ1d0cXlYPZ0zCr6b2sysTvGH2xfWkaFORmXVSADKh1hF
+k9kBgrbbTg3RJP+aKqctUGqSGnHjo/ml5logQjH/fqdMlRzT240o+67UeSwBceel
+JC1gMdSak/KShs977me6X22rlMkCAwEAAaOB5TCB4jAdBgNVHQ4EFgQUx+OIoetJ
+BT/T/030VGb30XCMQ3IwCQYDVR0TBAIwADALBgNVHQ8EBAMCBeAwEQYJYIZIAYb4
+QgEBBAQDAgWgMCwGCWCGSAGG+EIBDQQfFh1PcGVuU1NMIEdlbmVyYXRlZCBDZXJ0
+aWZpY2F0ZTBoBgNVHSMEYTBfgBQYX4JE3FSYgdnWsvPns1THlbAhOqE8pDowODEL
+MAkGA1UEBhMCVVMxEzARBgNVBAgMCk5ldyBKZXJzZXkxFDASBgNVBAoMC2xvY2Fs
+ZG9tYWluggkAkufHbZZxz2owDQYJKoZIhvcNAQEFBQADgYEAVSRVQOEEB5OdZ6w2
+w1zEIUQjATb7RydULEjsW1i8s9gSruQ7/EI89vIEHFYXsjypgQuu1OMXPN3gu/8J
+ASG8qChP5kE3Uz4VgXzTu1sAwkmJBHBStC7OT08fMtYfJ4Q06R++6Lq3pPpDRB68
+wsShOx/fIKRox6Jf4AeahsdfEZw=
+-----END CERTIFICATE-----
