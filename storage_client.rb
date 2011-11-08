@@ -30,8 +30,17 @@ optparse = OptionParser.new do |opts|
     options[:testing] = data
   end
 
+  options[:host] = '127.0.0.1'
+  opts.on( "-h", "--host", "KeyServer Host. Default: 127.0.0.1") do |host|
+    options[:host] = host
+  end
 
-  opts.on( '-h', '--help', 'Display this screen' ) do
+  options[:port] = 56789
+  opts.on( "-p", "--port", "KeyServer Port. Default: 56789") do |port|
+    options[:port] = port
+  end
+
+  opts.on( '-?', '--help', 'Display this screen' ) do
     puts opts
     exit
   end
@@ -41,47 +50,11 @@ end
 optparse.parse!
 out = options[:output].nil? ? $stdout : File.new(options[:output],'a')
 
-class Truecrypt
-  def self.mount(container, password, mountpoint )
-    `sudo truecrypt -t --mount #{container} --password #{password} #{mountpoint}`
-  end
 
-  def self.unmount(container)
-    `sudo trucrypt -d #{container}`
-  end
-end
-
-require 'socket'
-require 'openssl'
-require 'json'
-
-class KeyServer
-  def initialize(host,port)
-    @host = host
-    @port = port
-  end
-
-  def ask(data)
-    socket = TCPSocket.open(@host, @port)
-    ssl_context = OpenSSL::SSL::SSLContext.new()
-
-    ssl_context.cert = OpenSSL::X509::Certificate.new(File.open("x509/client.crt"))
-    ssl_context.key = OpenSSL::PKey::RSA.new(File.open("x509/client.key"))
-
-    ssl_socket = OpenSSL::SSL::SSLSocket.new(socket, ssl_context)
-    ssl_socket.sync_close = true
-    ssl_socket.connect
-
-    ssl_socket.puts(data.to_json)
-
-    ssl_socket.gets
-  end
-end
+require './lib/truecrypt'
+require './lib/key_client'
 
 if options[:testing]
-  server = KeyServer.new('127.0.0.1', options[:testing].to_i)
-  ans = server.ask({foo: 'bar', baz: 5})
-  p JSON.parse(ans)
 end
 
 
@@ -89,5 +62,6 @@ if options[:label]
   options[:mountpoint] = `mount | grep #{options[:device]}`.match(/.*on\s(\S*)\s.*/)[1]
   out.puts options.inspect
 
-  out.puts
+  server = KeyClient.new('127.0.0.1', options[:testing].to_i)
+  out.puts server.ask({user: 'bar', auth: 'secret', key: [options[:device], options[:label], options[:mountpoint]].join(':') } )
 end
