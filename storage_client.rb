@@ -25,11 +25,6 @@ optparse = OptionParser.new do |opts|
     options[:label] = label unless label.empty?
   end
 
-  options[:testing] = nil
-  opts.on( "-t", "--testing DATA", "only used for testing") do |data|
-    options[:testing] = data
-  end
-
   options[:host] = '127.0.0.1'
   opts.on( "-h", "--host", "KeyServer Host. Default: 127.0.0.1") do |host|
     options[:host] = host
@@ -37,7 +32,7 @@ optparse = OptionParser.new do |opts|
 
   options[:port] = 56789
   opts.on( "-p", "--port", "KeyServer Port. Default: 56789") do |port|
-    options[:port] = port
+    options[:port] = port.to_i
   end
 
   opts.on( '-?', '--help', 'Display this screen' ) do
@@ -53,15 +48,14 @@ out = options[:output].nil? ? $stdout : File.new(options[:output],'a')
 
 require './lib/truecrypt'
 require './lib/key_client'
-
-if options[:testing]
-end
+require 'pry'
 
 
 if options[:label]
   options[:mountpoint] = `mount | grep #{options[:device]}`.match(/.*on\s(\S*)\s.*/)[1]
+  p uuid = `blkid | grep #{options[:device]}`.match(/UUID="(.+)"/)[1]
   out.puts options.inspect
 
-  server = KeyClient.new('127.0.0.1', options[:testing].to_i)
-  out.puts server.ask({user: 'bar', auth: 'secret', key: [options[:device], options[:label], options[:mountpoint]].join(':') } )
+  server = KeyClient.new(options[:host], options[:port])
+  out.puts server.ask( {opcode: 1, keyid: [options[:device], options[:label], options[:mountpoint]].join(':') } )
 end
