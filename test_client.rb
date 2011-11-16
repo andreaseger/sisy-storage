@@ -1,8 +1,8 @@
 require './lib/key_client'
 
 
-host = ARGV[0]
-port = ARGV[1].to_i
+host = ARGV[0] || "127.0.0.1"
+port = 1337
 
 p "connecting to #{host}:#{port}"
 server = KeyClient.new(host,port)
