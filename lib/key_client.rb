@@ -51,5 +51,3 @@ class KeyClient
     end
   end
 end
-
-

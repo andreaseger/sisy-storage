@@ -5,11 +5,16 @@ require './lib/truecrypt'
 host = ARGV[0] || "127.0.0.1"
 port = 1337
 
-p "### connecting to #{host}:#{port}"
+p "  # connecting to #{host}:#{port}"
 server = KeyClient.new(host,port)
 
-p '### create key'
-p server.ask({opcode: 2, keyid: "Omnonnom", key: "oldsanfo3ih342f"})
+p '  # create key'
+p key = server.ask({opcode: 2, keyid: "Omnonnom"})
+
+if key['success']
+  p '  # new key'
+  p key['payload']
+end
 
 p '### get a key'
 p key = server.ask({opcode: 1, keyid: "Omnonnom"})
@@ -24,9 +29,11 @@ end
 p '### get a not existing key'
 p server.ask({opcode: 1, keyid: "wohooo"})
 
-#p '### delete key'
-#p server.ask({opcode: 3, keyid: "Omnonnom"})
+p '### delete key'
+p server.ask({opcode: 3, keyid: "Omnonnom"})
 
+p '### get a not existing key'
+p server.ask({opcode: 1, keyid: "Omnonnom"})
 
 # answers
 # { success: true, payload: key|error_message }
