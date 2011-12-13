@@ -1,0 +1,17 @@
+key_server:
+  ip: localhost
+  port: 1337
+usb_drive:
+  - desc: ADATA 32GB
+    rel_path: foo/container.tc
+    uuid: gjgjgjgjgjg
+    mount_point: ~/secure/adata
+  - desc: SDCard
+    rel_path: secure.tc
+    uuid: sdsdsdsdsdsdsdsd
+    mount_point: ~/secure/sdcard
+dropbox:
+  - id: tcdropbox
+    desc: secure documents
+    path: ~/dropbox/secure.tc
+    mount_point: ~/secure/dropbox

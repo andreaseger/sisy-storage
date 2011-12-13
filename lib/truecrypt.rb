@@ -1,8 +1,8 @@
 class Truecrypt
   def self.mount(container, password, mountpoint, test_drive=false )
-    cmd = "sudo truecrypt -t --mount #{container} --password #{password} #{mountpoint}"
+    cmd = "echo #{password} | sudo truecrypt -t --mount #{container} #{mountpoint}"
     if test_drive
-      p cmd
+      p "sudo truecrypt -t --mount #{container} #{mountpoint}"
     else
       system cmd
     end

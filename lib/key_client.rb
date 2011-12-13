@@ -26,15 +26,17 @@ EOF
 
 
 class KeyClient
-  def initialize(host,port)
+  def initialize(host, port, cert='x509/client.crt', cert_key='x509/client.key')
     @host = host
     @port = port
+    @cert = cert
+    @cert_key = cert_key
   end
 
   def ask(data)
     ssl_context = OpenSSL::SSL::SSLContext.new()
-    ssl_context.cert = OpenSSL::X509::Certificate.new(File.open("x509/client.crt"))
-    ssl_context.key = OpenSSL::PKey::RSA.new(File.open("x509/client.key"))
+    ssl_context.cert = OpenSSL::X509::Certificate.new(File.open(@cert))
+    ssl_context.key = OpenSSL::PKey::RSA.new(File.open(@cert_key))
 
     socket = TCPSocket.open(@host, @port)
     ssl = OpenSSL::SSL::SSLSocket.new(socket, ssl_context)
