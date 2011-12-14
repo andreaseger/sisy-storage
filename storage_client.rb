@@ -83,11 +83,11 @@ require './lib/truecrypt'
 require './lib/key_client'
 require 'ostruct'
 require 'pry'
+require 'yaml'
 
 CONTAINER_CONFIG = OpenStruct.new(YAML.load_file("container.yml"))
 
 container = nil
-
 
 if options[:device]
   return 0 unless options[:label]
@@ -95,20 +95,25 @@ if options[:device]
   uuid = `blkid | grep #{options[:device]}`.match(/UUID="(.+)"/)[1]
   container = CONTAINER_CONFIG.usb_drive.reduce({}){|a,e| a[e[:uuid]] = OpenStruct.new(e); a}[uuid]
   container.path = "#{mountpoint}/#{container.rel_path}"
+  container.key = container.uuid
 end
 
 if options[:dropbox]
   container = CONTAINER_CONFIG.dropbox.reduce({}){|a,e| a[e[:uuid]] = OpenStruct.new(e); a}[uuid]
+  require 'digest/sha1'
+  container.key = Digest::SHA1.hexdigest container.path
 end
 
-raise "cant find container" if container = nil
+raise "cant find container" if container.nil?
+
+binding.pry
 
 p "Container: #{container.desc}"
 
 if options[:unmount] && !options[:mount]
   p Truecrypt.unmount(container.path, options[:dry])
 elsif !options[:unmount] && options[:mount]
-  server = KeyClient.new(CONTAINER_CONFIG.key_server[:id],CONTAINER_CONFIG.key_server[:post])
+  server = KeyClient.new(CONTAINER_CONFIG.key_server[:ip],CONTAINER_CONFIG.key_server[:post])
   responds = server.ask( {opcode: 1, keyid: container.key } )
   if responds['success']
     p Truecrypt.mount(container.path, key['payload'], container.mount_point, options[:dry])
