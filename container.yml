@@ -8,7 +8,7 @@ usb_drive:
     mount_point: ~/secure/adata
   - desc: SDCard
     rel_path: secure.tc
-    uuid: sdsdsdsdsdsdsdsd
+    uuid: "7CA7-D82F"
     mount_point: ~/secure/sdcard
 dropbox:
   - id: tcdropbox

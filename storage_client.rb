@@ -35,40 +35,10 @@ optparse = OptionParser.new do |opts|
     options[:label] = opt
   end
 
-  options[:dry] = false
+  options[:dry] = true
   opts.on( "-y", "--dry", "Dry-Run. dont realy mount/unmount the container") do |opt|
     options[:dry] = true
   end
-
-#  options[:output] = nil
-#  opts.on( '-o', '--output FILE', 'Write log to FILE' ) do |file|
-#    options[:output] = file
-#  end
-#
-#  options[:mountpoint] = nil
-#  opts.on( "-m", "--mount-point MOUNT", "mount point directory (eg /media/cd)") do |mount|
-#    options[:mountpoint] = mount unless mount.empty?
-#  end
-#
-#  options[:device] = nil
-#  opts.on( "-d", "--device-name DEVICE", "device name (eg /dev/sdd1)") do |device|
-#    options[:device] = device unless device.empty?
-#  end
-#
-#  options[:label] = nil
-#  opts.on( "-l", "--label LABEL", "label of mounted volume") do |label|
-#    options[:label] = label unless label.empty?
-#  end
-#
-#  options[:host] = '127.0.0.1'
-#  opts.on( "-h", "--host", "KeyServer Host. Default: 127.0.0.1") do |host|
-#    options[:host] = host
-#  end
-#
-#  options[:port] = 56789
-#  opts.on( "-p", "--port", "KeyServer Port. Default: 56789") do |port|
-#    options[:port] = port.to_i
-#  end
 
   opts.on( '-?', '--help', 'Display this screen' ) do
     puts opts
@@ -86,38 +56,49 @@ require 'pry'
 require 'yaml'
 
 CONTAINER_CONFIG = OpenStruct.new(YAML.load_file("container.yml"))
+out = File.new('storage_client.log','a')
 
 container = nil
 
 if options[:device]
-  return 0 unless options[:label]
+  if options[:label].empty?
+    out.close
+    exit!
+  end
   mountpoint = `mount | grep #{options[:device]}`.match(/.*on\s(\S*)\s.*/)[1]
-  uuid = `blkid | grep #{options[:device]}`.match(/UUID="(.+)"/)[1]
+  uuid = `blkid | grep #{options[:device]}`.match(/UUID=\"(.+)\" \S/)[1]
   container = CONTAINER_CONFIG.usb_drive.reduce({}){|a,e| a[e[:uuid]] = OpenStruct.new(e); a}[uuid]
-  container.path = "#{mountpoint}/#{container.rel_path}"
-  container.key = container.uuid
+  container.path = "#{mountpoint}/#{container.rel_path}" if container
+  container.key = container.uuid if container
 end
 
 if options[:dropbox]
   container = CONTAINER_CONFIG.dropbox.reduce({}){|a,e| a[e[:uuid]] = OpenStruct.new(e); a}[uuid]
   require 'digest/sha1'
-  container.key = Digest::SHA1.hexdigest container.path
+  container.key = Digest::SHA1.hexdigest container.path if container
 end
 
-raise "cant find container" if container.nil?
+out.puts "container: #{container.inspect}"
+out.puts "label: #{options[:label].inspect}"
+out.puts "device: #{options[:device]}"
+out.puts "UUID: #{uuid}" if uuid
+out.puts "Mount Point: #{mountpoint}" if mountpoint
+if container.nil?
+  out.puts "cant find container"
+  out.close
+  exit!
+end
 
-binding.pry
-
-p "Container: #{container.desc}"
+out.puts "Container: #{container.desc}"
 
 if options[:unmount] && !options[:mount]
-  p Truecrypt.unmount(container.path, options[:dry])
+  out.puts Truecrypt.unmount(container.path, options[:dry])
 elsif !options[:unmount] && options[:mount]
   server = KeyClient.new(CONTAINER_CONFIG.key_server[:ip],CONTAINER_CONFIG.key_server[:post])
   responds = server.ask( {opcode: 1, keyid: container.key } )
   if responds['success']
-    p Truecrypt.mount(container.path, key['payload'], container.mount_point, options[:dry])
+    out.puts Truecrypt.mount(container.path, key['payload'], container.mount_point, options[:dry])
   end
 else
-  raise "choose mount OR unmount"
+  out.puts "choose mount OR unmount"
 end
