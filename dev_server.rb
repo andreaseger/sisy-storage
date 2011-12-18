@@ -34,9 +34,9 @@ loop do
         data = JSON.parse(request)
         case data['opcode']
         when 1
-          response = {success: true, payload: "b239rhf9b29f80whd"}
+          response = {success: true, payload: 'here_is your damn long key omnomnomnom'}
         when 2
-          response = {success: true, payload: nil}
+          response = {success: true, payload: 'here_is your damn long key omnomnomnom'}
         when 3
           response = {success: true, payload: nil}
         end
