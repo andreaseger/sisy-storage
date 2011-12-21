@@ -5,9 +5,9 @@ options = {}
 optparse = OptionParser.new do |opts|
   opts.banner = "Usage: do_stuff.rb [options] "
 
-  options[:dropbox] = nil
-  opts.on( "-d", "--dropbox NAME", "Mount a dropbox container. Select by Name configured in container.yml") do |opt|
-    options[:dropbox] = opt
+  options[:volume] = nil
+  opts.on( "-v", "--volume NAME", "Mount a truecrypt volume. select by path") do |opt|
+    options[:volume] = opt
   end
 
   options[:mount] = false
@@ -54,7 +54,7 @@ optparse = OptionParser.new do |opts|
   opts.on( "-a", "--automount", "Enable automount.") do |opt|
     options[:automount] = true
   end
-  options[:dry] = true
+  options[:dry] = false
   opts.on( "-y", "--dry", "Dry-Run. dont really mount/unmount the container") do |opt|
     options[:dry] = true
   end
@@ -79,21 +79,21 @@ CONFIG = YAML.load_file("container.yml")
 out = if options[:automount] then File.new('storage_client.log','a') else STDOUT end
 
 
-def get_container_info
+def get_container_info(options)
   if options[:automount] && options[:device] && !options[:label].empty?
     mountpoint = `mount | grep #{options[:device]}`.match(/.*on\s(\S*)\s.*/)[1]
     uuid = `blkid | grep #{options[:device]}`.match(/UUID=\"(.+)\" \S/)[1]
     container_options = CONFIG[:usb_drive][uuid]
     OpenStruct.new({ path: "#{mountpoint}/#{container_options.rel_path}", mount_point: container_options[:mount_point] }) if container_options
-  elsif options[:dropbox] && options[:mount_point]
-    OpenStruct.new({ path: File.expand_path(options[:dropbox]), mount_point: options[:mount_point] })
+  elsif options[:volume]
+    OpenStruct.new({ path: File.expand_path(options[:volume]), mount_point: options[:mount_point] })
   else
     nil
   end
 end
 
 
-container = get_container_info
+container = get_container_info(options)
 if options[:create] && options[:size]
   path = File.expand_path options[:create]
   if File.file? path
@@ -101,18 +101,19 @@ if options[:create] && options[:size]
     out.close
     exit!
   end
-  responds = KeyClient.get(CONFIG.key_server[:ip], CONFIG.key_server[:post], {opcode: 2, keyid: Digest::SHA1.hexdigest(File.basename(path)) } )
+  responds = KeyClient.get(CONFIG['key_server']['ip'], CONFIG['key_server']['port'], {opcode: 2, keyid: Digest::SHA1.hexdigest(File.basename(path)) } )
   if responds['success']
-    out.puts Truecrypt.create(path, response['payload'], options[:size], options[:dry])
+    out.puts Truecrypt.create(path, responds['payload'], options[:size], options[:dry])
   else
-    out.puts "Something when wrong: #{response['payload']}"
+    out.puts "Something when wrong: #{responds['payload']}"
   end
 elsif options[:mount] && !options[:unmount]
-  responds = KeyClient.get(CONFIG[:key_server][:ip],CONFIG[:key_server][:post], {opcode: 1, keyid: Digest::SHA1.hexdigest(File.basename(container.path)) } )
+  return unless container.mount_point
+  responds = KeyClient.get(CONFIG['key_server']['ip'],CONFIG['key_server']['port'], {opcode: 1, keyid: Digest::SHA1.hexdigest(File.basename(container.path)) } )
   if responds['success']
     out.puts Truecrypt.mount(container.path, responds['payload'], container.mount_point, options[:dry])
   else
-    out.puts "Something when wrong: #{response['payload']}"
+    out.puts "Something when wrong: #{responds['payload']}"
   end
 elsif options[:unmount] && !options[:mount]
   out.puts Truecrypt.unmount(container.path, options[:dry])

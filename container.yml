@@ -1,5 +1,6 @@
 key_server:
-  ip: '127.0.0.1'
+  ip: '10.158.72.23'
+  #ip: '127.0.0.1'
   port: 1337
 usb_drive:
   "gjgjgjgjgjg":
