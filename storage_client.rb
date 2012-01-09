@@ -50,6 +50,10 @@ optparse = OptionParser.new do |opts|
     options[:label] = opt
   end
 
+  options[:init_usb] = false
+  opts.on( "-usb", "--init-usb","Initialize a automount usb stick.(creates a new volume)") do |opt|
+    options[:init_usb] = true
+  end
   options[:automount] = false
   opts.on( "-a", "--automount", "Enable automount.") do |opt|
     options[:automount] = true
@@ -78,11 +82,17 @@ require 'digest/sha1'
 CONFIG = YAML.load_file("container.yml")
 out = if options[:automount] then File.new('storage_client.log','a') else STDOUT end
 
+def get_mountpoint(device)
+  `mount | grep #{device}`.match(/.*on\s(\S*)\s.*/)[1]
+end
+def get_uuid(device)
+  `sudo blkid | grep #{device}`.match(/UUID=\"(.+)\" \S/)[1]
+end
 
 def get_container_info(options)
   if options[:automount] && options[:device] && !options[:label].empty?
-    mountpoint = `mount | grep #{options[:device]}`.match(/.*on\s(\S*)\s.*/)[1]
-    uuid = `blkid | grep #{options[:device]}`.match(/UUID=\"(.+)\" \S/)[1]
+    mountpoint = get_mountpoint options[:device]
+    uuid = get_uuid options[:device]
     container_options = CONFIG[:usb_drive][uuid]
     OpenStruct.new({ path: "#{mountpoint}/#{container_options.rel_path}", mount_point: container_options[:mount_point] }) if container_options
   elsif options[:volume]
@@ -92,6 +102,29 @@ def get_container_info(options)
   end
 end
 
+if options[:init_usb]
+  if options[:device] && options[:volume] && options[:mount_point] && options[:size]
+    mountpoint = get_mountpoint options[:device]
+    uuid = get_uuid options[:device]
+
+    path = "#{mountpoint}/#{options[:volume]}"
+    responds = KeyClient.create(CONFIG['key_server']['ip'], CONFIG['key_server']['port'], Digest::SHA1.hexdigest(File.basename(path)) )
+    if responds['success']
+      out.puts Truecrypt.create(path, responds['payload'], options[:size], options[:dry])
+      File.open("container.yml", "a") do |io|
+        io.puts "  \"#{uuid}\":"
+        io.puts "    rel_path: #{options[:volume]}"
+        io.puts "    mount_point: #{options[:mount_point}"
+      end
+    else
+      out.puts "Something when wrong: #{responds['payload']}"
+    end
+  else
+    out.puts opts
+  end
+  out.close
+  exit!
+end
 
 container = get_container_info(options)
 if options[:create] && options[:size]
@@ -101,7 +134,7 @@ if options[:create] && options[:size]
     out.close
     exit!
   end
-  responds = KeyClient.get(CONFIG['key_server']['ip'], CONFIG['key_server']['port'], {opcode: 2, keyid: Digest::SHA1.hexdigest(File.basename(path)) } )
+  responds = KeyClient.create(CONFIG['key_server']['ip'], CONFIG['key_server']['port'], Digest::SHA1.hexdigest(File.basename(path)) )
   if responds['success']
     out.puts Truecrypt.create(path, responds['payload'], options[:size], options[:dry])
   else
@@ -109,7 +142,7 @@ if options[:create] && options[:size]
   end
 elsif options[:mount] && !options[:unmount]
   return unless container.mount_point
-  responds = KeyClient.get(CONFIG['key_server']['ip'],CONFIG['key_server']['port'], {opcode: 1, keyid: Digest::SHA1.hexdigest(File.basename(container.path)) } )
+  responds = KeyClient.read(CONFIG['key_server']['ip'],CONFIG['key_server']['port'], Digest::SHA1.hexdigest(File.basename(container.path)) )
   if responds['success']
     out.puts Truecrypt.mount(container.path, responds['payload'], container.mount_point, options[:dry])
   else
@@ -117,18 +150,10 @@ elsif options[:mount] && !options[:unmount]
   end
 elsif options[:unmount] && !options[:mount]
   out.puts Truecrypt.unmount(container.path, options[:dry])
+else
+  out.puts opts
 end
 
 
 out.close
 exit!
-#out.puts "container: #{container.inspect}"
-#out.puts "label: #{options[:label].inspect}"
-#out.puts "device: #{options[:device]}"
-#out.puts "UUID: #{uuid}" if uuid
-#out.puts "Mount Point: #{mountpoint}" if mountpoint
-#if container.nil?
-#  out.puts "cant find container"
-#  out.close
-#  exit!
-#end

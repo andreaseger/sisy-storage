@@ -36,13 +36,22 @@ class KeyClient
     ssl.sync_close = true
     ssl.connect
 
-    p "Certificate verified" if ssl.peer_cert.verify(OpenSSL::X509::Certificate.new(CA).public_key)
+    $stderr.puts "Certificate not_verified" and return nil unless ssl.peer_cert.verify(OpenSSL::X509::Certificate.new(CA).public_key)
 
     begin
       ssl.puts(data.to_json)
       JSON.parse(ssl.gets)
     rescue
-      $stderr.puts "Error from client: #{$!}"
+      $stderr.puts "Error from client: #{$!}" and return nil
     end
+  end
+  def self.read(host,port,keyid)
+    get(host,port,{opcode: 1, keyid: keyid})
+  end
+  def self.delete(host,port,keyid)
+    get(host,port,{opcode: 3, keyid: keyid})
+  end
+  def self.create(host,port,keyid)
+    get(host,port,{opcode: 2, keyid: keyid})
   end
 end

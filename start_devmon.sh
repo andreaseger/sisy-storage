@@ -1,3 +1,4 @@
 #!/bin/sh
 
-devmon --no-mount --exec-on-drive "ruby /home/sch1zo/code/sisy_storage/storage_client.rb -a -m -d %f -l %l" > /home/sch1zo/code/sisy_storage/devmon.log &
+devmon --no-mount --exec-on-drive "ruby /home/sch1zo/code/sisy_storage/storage_client.rb -a -m -d %f -l %l" > /dev/null &
+#devmon --no-mount --exec-on-drive "ruby /home/sch1zo/code/sisy_storage/storage_client.rb -a -m -d %f -l %l" > /home/sch1zo/code/sisy_storage/devmon.log &
