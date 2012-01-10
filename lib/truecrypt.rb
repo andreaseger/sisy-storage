@@ -12,22 +12,22 @@ class Truecrypt
 
   def self.unmount(container, test_drive=false )
     cmd = "sudo truecrypt --dismount #{container}"
-    if test_drive
-      p cmd
-    else
-      system cmd
-    end
+    run_cmd(cmd,test_drive)
     mounted_container
   end
 
   def self.create(location, key, size, test_drive=false)
+    #size in MB
     random_source
-    cmd = "truecrypt -t --create '#{location}' --encryption=AES --filesystem=FAT --size=#{size.to_i*1024} --random-source=/tmp/random_source --volume-type=normal --hash=sha-512 --non-interactive -p '#{key}'"
-    if test_drive
-      p cmd
-    else
-      system cmd
-    end
+    cmd = "truecrypt -t --create '#{location}' --encryption=AES --filesystem=FAT --size=#{size.to_i*2**20} --random-source=/tmp/random_source --volume-type=normal --hash=sha-512 --non-interactive -p '#{key}'"
+    run_cmd(cmd,test_drive)
+    mounted_container
+  end
+
+  def self.change(location, old_key, new_key)
+    random_source
+    cmd = "truecrypt -t --change '#{location}' --password=#{old_key} --new-password=#{key}"
+    run_cmd(cmd,test_drive)
     mounted_container
   end
 
@@ -36,6 +36,18 @@ private
     `cat /dev/urandom | tr -dc "a-zA-Z0-9-_%^&*()_+{}|:<>?=" | fold -w 4096 | head -n1 | echo > /tmp/random_source`
   end
   def self.mounted_container
-    `truecrypt -t -l`
+    l = `truecrypt -t -l`
+    if l == "Error: No volumes mounted."
+      "No volumes mounted."
+    else
+      l
+    end
+  end
+  def run_cmd(cmd,test_drive)
+    if test_drive
+      p cmd
+    else
+      system cmd
+    end
   end
 end

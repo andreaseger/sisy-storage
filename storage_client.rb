@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'optparse'
 
 options = {}
@@ -11,12 +13,12 @@ optparse = OptionParser.new do |opts|
   end
 
   options[:mount] = false
-  opts.on( "-m", "--mount", "mount a container") do |opt|
+  opts.on( "-m", "--mount", "Mount a container") do |opt|
     options[:mount] = true
   end
 
   options[:mount_point] = nil
-  opts.on( "-mp", "--mountpoint", "Mount Point.") do |opt|
+  opts.on( "-M", "--mountpoint MOUNTPOINT", "Mount Point") do |opt|
     options[:mount_point] = opt
   end
 
@@ -26,8 +28,12 @@ optparse = OptionParser.new do |opts|
   end
 
   options[:create] = false
-  opts.on( "-c", "--create PATH", "create Volume") do |opt|
+  opts.on( "-c", "--create PATH", "Create Volume") do |opt|
     options[:create] = opt
+  end
+  options[:change] = false
+  opts.on( "-C", "--change PATH", "Change the password to a new one.") do |opt|
+    options[:change] = opt
   end
 
   options[:size] = nil
@@ -51,7 +57,7 @@ optparse = OptionParser.new do |opts|
   end
 
   options[:init_usb] = false
-  opts.on( "-usb", "--init-usb","Initialize a automount usb stick.(creates a new volume)") do |opt|
+  opts.on( "-i", "--init-usb","Initialize a automount usb stick.(creates a new volume)") do |opt|
     options[:init_usb] = true
   end
   options[:automount] = false
@@ -114,13 +120,13 @@ if options[:init_usb]
       File.open("container.yml", "a") do |io|
         io.puts "  \"#{uuid}\":"
         io.puts "    rel_path: #{options[:volume]}"
-        io.puts "    mount_point: #{options[:mount_point}"
+        io.puts "    mount_point: #{options[:mount_point]}"
       end
     else
       out.puts "Something when wrong: #{responds['payload']}"
     end
   else
-    out.puts opts
+    out.puts optparse
   end
   out.close
   exit!
@@ -130,7 +136,8 @@ container = get_container_info(options)
 if options[:create] && options[:size]
   path = File.expand_path options[:create]
   if File.file? path
-    out.puts "A file named #{path} already exits"
+    out.puts "A file named #{path} already exits."
+    out.puts optparse
     out.close
     exit!
   end
@@ -139,6 +146,27 @@ if options[:create] && options[:size]
     out.puts Truecrypt.create(path, responds['payload'], options[:size], options[:dry])
   else
     out.puts "Something when wrong: #{responds['payload']}"
+  end
+elsif options[:change]
+  path = File.expand_path options[:create]
+  unless File.file? path
+    out.puts "A file named #{path} does not exist. Try to create one with --create."
+    out.puts optparse
+    out.close
+    exit!
+  end
+  responds = KeyClient.read(CONFIG['key_server']['ip'],CONFIG['key_server']['port'], Digest::SHA1.hexdigest(File.basename(path)) )
+  if responds['success']
+    old_passphrase = responds['payload']
+    responds = KeyClient.delete(CONFIG['key_server']['ip'],CONFIG['key_server']['port'], Digest::SHA1.hexdigest(File.basename(path)) )
+    if responds['success']
+      responds = KeyClient.create(CONFIG['key_server']['ip'], CONFIG['key_server']['port'], Digest::SHA1.hexdigest(File.basename(path)) )
+      if responds['success']
+        out.puts Truecrypt.change(path, old_passphrase, responds['payload'], options[:size], options[:dry])
+      else
+        out.puts "Something when wrong: #{responds['payload']}"
+      end
+    end
   end
 elsif options[:mount] && !options[:unmount]
   return unless container.mount_point
@@ -151,7 +179,7 @@ elsif options[:mount] && !options[:unmount]
 elsif options[:unmount] && !options[:mount]
   out.puts Truecrypt.unmount(container.path, options[:dry])
 else
-  out.puts opts
+  out.puts optparse
 end
 
 
