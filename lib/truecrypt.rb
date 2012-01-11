@@ -21,14 +21,12 @@ class Truecrypt
     random_source
     cmd = "truecrypt -t --create '#{location}' --encryption=AES --filesystem=FAT --size=#{size.to_i*2**20} --random-source=/tmp/random_source --volume-type=normal --hash=sha-512 --non-interactive -p '#{key}'"
     run_cmd(cmd,test_drive)
-    mounted_container
   end
 
-  def self.change(location, old_key, new_key)
+  def self.change(location, old_key, new_key, test_drive=false)
     random_source
     cmd = "truecrypt -t --change '#{location}' --password=#{old_key} --new-password=#{key}"
     run_cmd(cmd,test_drive)
-    mounted_container
   end
 
 private
@@ -37,13 +35,13 @@ private
   end
   def self.mounted_container
     l = `truecrypt -t -l`
-    if l == "Error: No volumes mounted."
+    if l =~ /No volumes mounted/
       "No volumes mounted."
     else
       l
     end
   end
-  def run_cmd(cmd,test_drive)
+  def self.run_cmd(cmd,test_drive)
     if test_drive
       p cmd
     else

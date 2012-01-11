@@ -81,7 +81,6 @@ optparse.parse!
 require './lib/truecrypt'
 require './lib/key_client'
 require 'ostruct'
-require 'pry'
 require 'yaml'
 require 'digest/sha1'
 
@@ -148,7 +147,7 @@ if options[:create] && options[:size]
     out.puts "Something when wrong: #{responds['payload']}"
   end
 elsif options[:change]
-  path = File.expand_path options[:create]
+  path = File.expand_path options[:change]
   unless File.file? path
     out.puts "A file named #{path} does not exist. Try to create one with --create."
     out.puts optparse
@@ -162,7 +161,7 @@ elsif options[:change]
     if responds['success']
       responds = KeyClient.create(CONFIG['key_server']['ip'], CONFIG['key_server']['port'], Digest::SHA1.hexdigest(File.basename(path)) )
       if responds['success']
-        out.puts Truecrypt.change(path, old_passphrase, responds['payload'], options[:size], options[:dry])
+        out.puts Truecrypt.change(path, old_passphrase, responds['payload'], options[:dry])
       else
         out.puts "Something when wrong: #{responds['payload']}"
       end
