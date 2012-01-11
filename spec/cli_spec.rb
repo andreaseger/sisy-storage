@@ -6,7 +6,7 @@ require 'fileutils'
 require 'pry'
 
 describe "CLI" do
-  let(:host) { '192.168.178.21' }
+  let(:host) { '10.158.72.156' }
   let(:port) { 1337 }
   let(:keyid) { 'nomnomnomnom' }
   let(:cmd) { 'ruby storage_client.rb' }

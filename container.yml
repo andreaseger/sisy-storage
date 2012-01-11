@@ -1,11 +1,11 @@
 key_server:
-  ip: '192.168.178.21'
+  ip: '10.158.72.156'
   #ip: '127.0.0.1'
   port: 1337
 usb_drive:
   "gjgjgjgjgjg":
     rel_path: foo/container.tc
     mount_point: ~/secure/adata
-  "7CA7-D82F":
-    rel_path: secure.tc
-    mount_point: ~/secure/sdcard
+  "0AF5-C734":
+    rel_path: foo.tc
+    mount_point: ~/secure
